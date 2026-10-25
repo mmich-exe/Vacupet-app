@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-@Database(entities = [Mascota::class, Recordatorio::class, Perfil::class], version = 2, exportSchema = false)
+@Database(entities = [Mascota::class, Recordatorio::class, Perfil::class], version = 3, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun mascotaDao(): MascotaDao
@@ -26,6 +26,13 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        /** Versión 3: se agrega la columna "favorito" a las mascotas (por defecto, no favorita). */
+        private val MIGRACION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE `mascotas` ADD COLUMN `favorito` INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
         @Volatile
         private var instancia: AppDatabase? = null
 
@@ -35,7 +42,7 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "vacupet.db"
-                ).addMigrations(MIGRACION_1_2).build().also { instancia = it }
+                ).addMigrations(MIGRACION_1_2, MIGRACION_2_3).build().also { instancia = it }
             }
     }
 }

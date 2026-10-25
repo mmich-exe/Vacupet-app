@@ -113,6 +113,13 @@ class AppViewModel(
         }
     }
 
+    /** UPDATE rápido: marca o desmarca una mascota como favorita. */
+    fun alternarFavorito(mascota: Mascota) {
+        viewModelScope.launch {
+            repository.actualizarMascota(mascota.copy(favorito = !mascota.favorito))
+        }
+    }
+
     fun eliminarMascota(mascota: Mascota) {
         viewModelScope.launch { repository.eliminarMascota(mascota) }
     }

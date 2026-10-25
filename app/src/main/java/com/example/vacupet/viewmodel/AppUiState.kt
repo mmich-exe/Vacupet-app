@@ -49,6 +49,10 @@ data class AppUiState(
                 (filtroEspecie == null || m.especie == filtroEspecie)
         }
 
+    /** Mascotas marcadas con la estrella. */
+    val favoritas: List<Mascota>
+        get() = mascotas.filter { it.favorito }
+
     /** Medianoche de hoy: las citas de hoy cuentan como próximas. */
     private val inicioDeHoy: Long
         get() = Calendar.getInstance().apply {

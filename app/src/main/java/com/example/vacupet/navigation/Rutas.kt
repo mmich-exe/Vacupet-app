@@ -6,7 +6,10 @@ object Rutas {
     const val REGISTRO = "registro"
     const val LISTADO = "listado"
     const val AGENDA = "agenda"
-    const val PERFIL = "perfil"
+    const val INICIO = "inicio"            // menú principal después del login
+    const val FAVORITOS = "favoritos"
+    const val PERFIL = "perfil"            // ver perfil
+    const val PERFIL_EDITAR = "perfil_editar"
 
     const val ARG_ID = "id"
 

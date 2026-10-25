@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -32,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.vacupet.components.DoradoFavorito
 import com.example.vacupet.components.FondoDegradado
 import com.example.vacupet.components.FotoMascota
 import com.example.vacupet.components.NaranjaCita
@@ -49,6 +51,7 @@ fun DetalleScreen(
     onVolver: () -> Unit,
     onEditar: () -> Unit,
     onRecordatorios: () -> Unit,
+    onFavorito: () -> Unit,
     onEliminar: () -> Unit
 ) {
     var confirmarEliminar by rememberSaveable { mutableStateOf(false) }
@@ -60,6 +63,13 @@ fun DetalleScreen(
                 onVolver = onVolver,
                 acciones = {
                     if (mascota != null) {
+                        IconButton(onClick = onFavorito) {
+                            Icon(
+                                imageVector = Icons.Default.Star,
+                                contentDescription = if (mascota.favorito) "Quitar de favoritos" else "Agregar a favoritos",
+                                tint = if (mascota.favorito) DoradoFavorito else Color.White.copy(alpha = 0.6f)
+                            )
+                        }
                         IconButton(onClick = { confirmarEliminar = true }) {
                             Icon(Icons.Default.Delete, contentDescription = "Eliminar mascota")
                         }

@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -27,12 +29,15 @@ import com.example.vacupet.R
 import com.example.vacupet.data.Mascota
 import com.example.vacupet.data.Recordatorio
 
+val DoradoFavorito = Color(0xFFFFB300)
+
 @Composable
 fun MascotaCard(
     mascota: Mascota,
     proximaCita: Recordatorio?,
     onClick: () -> Unit,
     onEditar: () -> Unit,
+    onFavorito: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -45,7 +50,7 @@ fun MascotaCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(start = 16.dp, top = 12.dp, bottom = 12.dp, end = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             FotoMascota(ruta = mascota.fotoPath, tamano = 56.dp)
@@ -75,6 +80,15 @@ fun MascotaCard(
                         overflow = TextOverflow.Ellipsis
                     )
                 }
+            }
+            // Estrella: dorada si es favorita, gris si no.
+            IconButton(onClick = onFavorito) {
+                Icon(
+                    imageVector = Icons.Default.Star,
+                    contentDescription = if (mascota.favorito) "Quitar de favoritos" else "Agregar a favoritos",
+                    tint = if (mascota.favorito) DoradoFavorito else Color(0xFFBDBDBD),
+                    modifier = Modifier.size(28.dp)
+                )
             }
             IconButton(onClick = onEditar) {
                 Icon(

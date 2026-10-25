@@ -1,6 +1,5 @@
 package com.example.vacupet.screens
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,7 +14,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.FilterChip
@@ -38,12 +36,12 @@ import com.example.vacupet.R
 import com.example.vacupet.components.FondoDegradado
 import com.example.vacupet.components.MascotaCard
 import com.example.vacupet.components.VacuTopBar
-import com.example.vacupet.components.VerdeOscuro
 import com.example.vacupet.components.VerdeVacu
 import com.example.vacupet.data.ESPECIES
+import com.example.vacupet.data.Mascota
 import com.example.vacupet.viewmodel.AppUiState
 
-/** Pantalla principal: lista de mascotas con búsqueda y filtro por especie. */
+/** Lista de mascotas con búsqueda, filtro por especie y estrella de favorito. */
 @Composable
 fun ListadoScreen(
     state: AppUiState,
@@ -51,30 +49,14 @@ fun ListadoScreen(
     onFiltroEspecie: (String?) -> Unit,
     onAbrirDetalle: (Int) -> Unit,
     onEditar: (Int) -> Unit,
+    onFavorito: (Mascota) -> Unit,
     onNueva: () -> Unit,
-    onAgenda: () -> Unit,
-    onPerfil: () -> Unit
+    onVolver: () -> Unit
 ) {
     val lista = state.mascotasFiltradas
 
     Scaffold(
-        topBar = {
-            VacuTopBar(
-                titulo = "Mis hijos animales",
-                acciones = {
-                    IconButton(onClick = onAgenda) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_alarm),
-                            contentDescription = "Agenda de citas",
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                    IconButton(onClick = onPerfil) {
-                        Icon(Icons.Default.AccountCircle, contentDescription = "Mi perfil")
-                    }
-                }
-            )
-        },
+        topBar = { VacuTopBar(titulo = "Mis hijos animales", onVolver = onVolver) },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onNueva,
@@ -92,18 +74,6 @@ fun ListadoScreen(
     ) { padding ->
         FondoDegradado(Modifier.padding(padding)) {
             Column(modifier = Modifier.fillMaxSize()) {
-                if (!state.cargando) {
-                    val saludo = state.perfil?.nombre?.substringBefore(' ')
-                    Text(
-                        text = if (saludo != null) "¡Hola, $saludo!" else "Completa tu perfil para personalizar la app",
-                        fontWeight = FontWeight.SemiBold,
-                        color = VerdeOscuro,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onPerfil() }
-                            .padding(start = 16.dp, end = 16.dp, top = 12.dp)
-                    )
-                }
                 if (state.mascotas.isNotEmpty()) {
                     OutlinedTextField(
                         value = state.busqueda,
@@ -181,7 +151,8 @@ fun ListadoScreen(
                                 mascota = mascota,
                                 proximaCita = state.proximaCita(mascota.id),
                                 onClick = { onAbrirDetalle(mascota.id) },
-                                onEditar = { onEditar(mascota.id) }
+                                onEditar = { onEditar(mascota.id) },
+                                onFavorito = { onFavorito(mascota) }
                             )
                         }
                     }

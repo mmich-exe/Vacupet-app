@@ -1,5 +1,6 @@
 package com.example.vacupet.data
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
@@ -22,7 +23,8 @@ data class Mascota(
     val fotoPath: String? = null,
     val cumpleanos: String = "",
     val vacunas: String = "",
-    val infoExtra: String = ""
+    val infoExtra: String = "",
+    @ColumnInfo(defaultValue = "0") val favorito: Boolean = false
 )
 
 /**

@@ -18,10 +18,13 @@ import androidx.navigation.navArgument
 import com.example.vacupet.repository.AppRepository
 import com.example.vacupet.screens.AgendaScreen
 import com.example.vacupet.screens.DetalleScreen
+import com.example.vacupet.screens.FavoritosScreen
 import com.example.vacupet.screens.FormularioScreen
+import com.example.vacupet.screens.InicioScreen
 import com.example.vacupet.screens.ListadoScreen
-import com.example.vacupet.screens.PerfilScreen
 import com.example.vacupet.screens.LoginScreen
+import com.example.vacupet.screens.PerfilEditarScreen
+import com.example.vacupet.screens.PerfilScreen
 import com.example.vacupet.screens.RecordatoriosScreen
 import com.example.vacupet.screens.RegistroScreen
 import com.example.vacupet.screens.SplashScreen
@@ -43,7 +46,7 @@ fun AppNavigation(
         viewModel<AppViewModel>(key = uid, factory = AppViewModelFactory(repository, uid))
     }
 
-    // Reacciona a cambios de sesión: login -> Listado, logout -> Login.
+    // Reacciona a cambios de sesión: login -> Menú principal, logout -> Login.
     LaunchedEffect(auth.uid) {
         val rutaActual = navController.currentBackStackEntry?.destination?.route ?: return@LaunchedEffect
         val enPantallaDeAcceso = rutaActual == Rutas.LOGIN || rutaActual == Rutas.REGISTRO
@@ -52,7 +55,7 @@ fun AppNavigation(
                 popUpTo(navController.graph.id) { inclusive = true }
             }
         } else if (auth.uid != null && enPantallaDeAcceso) {
-            navController.navigate(Rutas.LISTADO) {
+            navController.navigate(Rutas.INICIO) {
                 popUpTo(navController.graph.id) { inclusive = true }
             }
         }
@@ -64,8 +67,8 @@ fun AppNavigation(
         composable(Rutas.SPLASH) {
             SplashScreen(
                 onTerminar = {
-                    // Si Firebase tiene una sesión guardada, se entra directo a la app.
-                    val destino = if (authViewModel.haySesion()) Rutas.LISTADO else Rutas.LOGIN
+                    // Si Firebase tiene una sesión guardada, se entra directo al menú.
+                    val destino = if (authViewModel.haySesion()) Rutas.INICIO else Rutas.LOGIN
                     navController.navigate(destino) {
                         popUpTo(Rutas.SPLASH) { inclusive = true }
                     }
@@ -95,6 +98,21 @@ fun AppNavigation(
         }
 
         // ---------- Pantallas protegidas (requieren sesión) ----------
+
+        // Menú principal: perfil + accesos a mascotas, recordatorios y favoritos
+        composable(Rutas.INICIO) {
+            val vm = appViewModel ?: return@composable
+            val state by vm.uiState.collectAsStateWithLifecycle()
+            InicioScreen(
+                email = auth.email.orEmpty(),
+                state = state,
+                onMascotas = { navController.navigate(Rutas.LISTADO) },
+                onRecordatorios = { navController.navigate(Rutas.AGENDA) },
+                onFavoritos = { navController.navigate(Rutas.FAVORITOS) },
+                onPerfil = { navController.navigate(Rutas.PERFIL) }
+            )
+        }
+
         composable(Rutas.LISTADO) {
             val vm = appViewModel ?: return@composable
             val state by vm.uiState.collectAsStateWithLifecycle()
@@ -104,9 +122,21 @@ fun AppNavigation(
                 onFiltroEspecie = vm::cambiarFiltroEspecie,
                 onAbrirDetalle = { id -> navController.navigate(Rutas.detalle(id)) },
                 onEditar = { id -> navController.navigate(Rutas.formulario(id)) },
+                onFavorito = vm::alternarFavorito,
                 onNueva = { navController.navigate(Rutas.formulario()) },
-                onAgenda = { navController.navigate(Rutas.AGENDA) },
-                onPerfil = { navController.navigate(Rutas.PERFIL) }
+                onVolver = { navController.popBackStack() }
+            )
+        }
+
+        composable(Rutas.FAVORITOS) {
+            val vm = appViewModel ?: return@composable
+            val state by vm.uiState.collectAsStateWithLifecycle()
+            FavoritosScreen(
+                state = state,
+                onAbrirDetalle = { id -> navController.navigate(Rutas.detalle(id)) },
+                onEditar = { id -> navController.navigate(Rutas.formulario(id)) },
+                onFavorito = vm::alternarFavorito,
+                onVolver = { navController.popBackStack() }
             )
         }
 
@@ -124,6 +154,7 @@ fun AppNavigation(
                 onVolver = { navController.popBackStack() },
                 onEditar = { navController.navigate(Rutas.formulario(id)) },
                 onRecordatorios = { navController.navigate(Rutas.recordatorios(id)) },
+                onFavorito = { mascota?.let(vm::alternarFavorito) },
                 onEliminar = {
                     mascota?.let(vm::eliminarMascota)
                     navController.popBackStack()
@@ -189,6 +220,17 @@ fun AppNavigation(
             )
         }
 
+        composable(Rutas.AGENDA) {
+            val vm = appViewModel ?: return@composable
+            val state by vm.uiState.collectAsStateWithLifecycle()
+            AgendaScreen(
+                state = state,
+                onAbrirMascota = { id -> navController.navigate(Rutas.detalle(id)) },
+                onVolver = { navController.popBackStack() }
+            )
+        }
+
+        // Perfil: primero se VE; el botón "Editar perfil" abre el formulario.
         composable(Rutas.PERFIL) {
             val vm = appViewModel ?: return@composable
             val state by vm.uiState.collectAsStateWithLifecycle()
@@ -197,20 +239,30 @@ fun AppNavigation(
                 perfil = state.perfil,
                 totalMascotas = state.mascotas.size,
                 citasProximas = state.citasProximas.size,
-                errores = state.erroresPerfil,
-                onGuardar = vm::guardarPerfil,
-                onLimpiarErrores = vm::limpiarErroresPerfil,
+                totalFavoritas = state.favoritas.size,
+                onEditar = { navController.navigate(Rutas.PERFIL_EDITAR) },
                 onCerrarSesion = authViewModel::logout,
                 onVolver = { navController.popBackStack() }
             )
         }
 
-        composable(Rutas.AGENDA) {
+        composable(Rutas.PERFIL_EDITAR) {
             val vm = appViewModel ?: return@composable
             val state by vm.uiState.collectAsStateWithLifecycle()
-            AgendaScreen(
-                state = state,
-                onAbrirMascota = { id -> navController.navigate(Rutas.detalle(id)) },
+            PerfilEditarScreen(
+                perfil = state.perfil,
+                errores = state.erroresPerfil,
+                onGuardar = { nombre, telefono, cumpleanos, ciudad, fotoPath ->
+                    vm.guardarPerfil(
+                        nombre = nombre,
+                        telefono = telefono,
+                        cumpleanos = cumpleanos,
+                        ciudad = ciudad,
+                        fotoPath = fotoPath,
+                        onGuardado = { navController.popBackStack() }
+                    )
+                },
+                onLimpiarErrores = vm::limpiarErroresPerfil,
                 onVolver = { navController.popBackStack() }
             )
         }
