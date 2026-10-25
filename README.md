@@ -188,3 +188,4 @@ app/src/main/java/com/example/vacupet/
 ## 👩‍💻 Autoría
 
 Desarrollado por **Michele** ([@mmich-exe](https://github.com/mmich-exe)) como proyecto de la asignatura Programación de Aplicaciones Móviles, INACAP.
+Desarrollado por **Christopher** ([@Multi-Fruit](https://github.com/Multi-Fruit)) como proyecto de la asignatura Programación de Aplicaciones Móviles, INACAP.
