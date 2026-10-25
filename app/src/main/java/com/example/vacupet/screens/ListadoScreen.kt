@@ -1,5 +1,6 @@
 package com.example.vacupet.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,7 +15,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.FilterChip
@@ -37,6 +38,7 @@ import com.example.vacupet.R
 import com.example.vacupet.components.FondoDegradado
 import com.example.vacupet.components.MascotaCard
 import com.example.vacupet.components.VacuTopBar
+import com.example.vacupet.components.VerdeOscuro
 import com.example.vacupet.components.VerdeVacu
 import com.example.vacupet.data.ESPECIES
 import com.example.vacupet.viewmodel.AppUiState
@@ -51,7 +53,7 @@ fun ListadoScreen(
     onEditar: (Int) -> Unit,
     onNueva: () -> Unit,
     onAgenda: () -> Unit,
-    onCerrarSesion: () -> Unit
+    onPerfil: () -> Unit
 ) {
     val lista = state.mascotasFiltradas
 
@@ -67,8 +69,8 @@ fun ListadoScreen(
                             modifier = Modifier.size(24.dp)
                         )
                     }
-                    IconButton(onClick = onCerrarSesion) {
-                        Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "Cerrar sesión")
+                    IconButton(onClick = onPerfil) {
+                        Icon(Icons.Default.AccountCircle, contentDescription = "Mi perfil")
                     }
                 }
             )
@@ -90,6 +92,18 @@ fun ListadoScreen(
     ) { padding ->
         FondoDegradado(Modifier.padding(padding)) {
             Column(modifier = Modifier.fillMaxSize()) {
+                if (!state.cargando) {
+                    val saludo = state.perfil?.nombre?.substringBefore(' ')
+                    Text(
+                        text = if (saludo != null) "¡Hola, $saludo!" else "Completa tu perfil para personalizar la app",
+                        fontWeight = FontWeight.SemiBold,
+                        color = VerdeOscuro,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onPerfil() }
+                            .padding(start = 16.dp, end = 16.dp, top = 12.dp)
+                    )
+                }
                 if (state.mascotas.isNotEmpty()) {
                     OutlinedTextField(
                         value = state.busqueda,

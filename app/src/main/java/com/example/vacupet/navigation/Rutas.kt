@@ -6,6 +6,7 @@ object Rutas {
     const val REGISTRO = "registro"
     const val LISTADO = "listado"
     const val AGENDA = "agenda"
+    const val PERFIL = "perfil"
 
     const val ARG_ID = "id"
 

@@ -3,6 +3,7 @@ package com.example.vacupet.data
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
@@ -41,4 +42,15 @@ interface RecordatorioDao {
 
     @Delete
     suspend fun eliminar(recordatorio: Recordatorio)
+}
+
+@Dao
+interface PerfilDao {
+
+    @Query("SELECT * FROM perfiles WHERE userId = :userId")
+    fun observar(userId: String): Flow<Perfil?>
+
+    // Inserta el perfil si no existe o lo reemplaza si ya existe.
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun guardar(perfil: Perfil)
 }

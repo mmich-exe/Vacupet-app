@@ -3,6 +3,7 @@ package com.example.vacupet.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.vacupet.data.Mascota
+import com.example.vacupet.data.Perfil
 import com.example.vacupet.data.Recordatorio
 import com.example.vacupet.repository.AppRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,7 +24,8 @@ class AppViewModel(
         val busqueda: String = "",
         val especie: String? = null,
         val erroresMascota: MascotaErrores = MascotaErrores(),
-        val erroresRecordatorio: RecordatorioErrores = RecordatorioErrores()
+        val erroresRecordatorio: RecordatorioErrores = RecordatorioErrores(),
+        val erroresPerfil: PerfilErrores = PerfilErrores()
     )
 
     private val local = MutableStateFlow(Local())
@@ -31,16 +33,19 @@ class AppViewModel(
     val uiState: StateFlow<AppUiState> = combine(
         repository.observarMascotas(userId),
         repository.observarRecordatorios(userId),
+        repository.observarPerfil(userId),
         local
-    ) { mascotas, recordatorios, l ->
+    ) { mascotas, recordatorios, perfil, l ->
         AppUiState(
             cargando = false,
             mascotas = mascotas,
             recordatorios = recordatorios,
+            perfil = perfil,
             busqueda = l.busqueda,
             filtroEspecie = l.especie,
             erroresMascota = l.erroresMascota,
-            erroresRecordatorio = l.erroresRecordatorio
+            erroresRecordatorio = l.erroresRecordatorio,
+            erroresPerfil = l.erroresPerfil
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AppUiState())
 
@@ -110,6 +115,49 @@ class AppViewModel(
 
     fun eliminarMascota(mascota: Mascota) {
         viewModelScope.launch { repository.eliminarMascota(mascota) }
+    }
+
+    // ---------- Perfil del usuario ----------
+
+    fun limpiarErroresPerfil() = local.update { it.copy(erroresPerfil = PerfilErrores()) }
+
+    /** Crea o actualiza el perfil del usuario (una fila por usuario). */
+    fun guardarPerfil(
+        nombre: String,
+        telefono: String,
+        cumpleanos: String,
+        ciudad: String,
+        fotoPath: String?,
+        onGuardado: () -> Unit
+    ) {
+        val digitos = telefono.filter { it.isDigit() }
+        val errores = PerfilErrores(
+            nombre = when {
+                nombre.isBlank() -> "El nombre es obligatorio"
+                nombre.trim().length < 2 -> "Debe tener al menos 2 caracteres"
+                else -> null
+            },
+            telefono = if (telefono.isNotBlank() && digitos.length !in 8..15)
+                "Ingresa un teléfono válido (8 a 15 dígitos)" else null
+        )
+        if (errores.hayErrores) {
+            local.update { it.copy(erroresPerfil = errores) }
+            return
+        }
+        viewModelScope.launch {
+            repository.guardarPerfil(
+                Perfil(
+                    userId = userId,
+                    nombre = nombre.trim(),
+                    telefono = telefono.trim(),
+                    cumpleanos = cumpleanos,
+                    ciudad = ciudad.trim(),
+                    fotoPath = fotoPath
+                )
+            )
+            local.update { it.copy(erroresPerfil = PerfilErrores()) }
+            onGuardado()
+        }
     }
 
     // ---------- Recordatorios ----------

@@ -17,7 +17,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         val database = AppDatabase.getInstance(applicationContext)
-        val repository = AppRepository(database.mascotaDao(), database.recordatorioDao())
+        val repository = AppRepository(database.mascotaDao(), database.recordatorioDao(), database.perfilDao())
 
         setContent {
             VacuPetTheme {

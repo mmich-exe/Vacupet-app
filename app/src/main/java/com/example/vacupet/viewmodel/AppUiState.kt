@@ -1,6 +1,7 @@
 package com.example.vacupet.viewmodel
 
 import com.example.vacupet.data.Mascota
+import com.example.vacupet.data.Perfil
 import com.example.vacupet.data.Recordatorio
 import java.util.Calendar
 
@@ -21,15 +22,25 @@ data class RecordatorioErrores(
     val hayErrores: Boolean get() = fecha != null || motivo != null || descripcion != null
 }
 
+/** Errores de validación del perfil. */
+data class PerfilErrores(
+    val nombre: String? = null,
+    val telefono: String? = null
+) {
+    val hayErrores: Boolean get() = nombre != null || telefono != null
+}
+
 /** Estado completo que la UI observa. */
 data class AppUiState(
     val cargando: Boolean = true,
     val mascotas: List<Mascota> = emptyList(),
     val recordatorios: List<Recordatorio> = emptyList(),
+    val perfil: Perfil? = null,
     val busqueda: String = "",
     val filtroEspecie: String? = null,
     val erroresMascota: MascotaErrores = MascotaErrores(),
-    val erroresRecordatorio: RecordatorioErrores = RecordatorioErrores()
+    val erroresRecordatorio: RecordatorioErrores = RecordatorioErrores(),
+    val erroresPerfil: PerfilErrores = PerfilErrores()
 ) {
     /** Mascotas filtradas por búsqueda (nombre) y especie. */
     val mascotasFiltradas: List<Mascota>

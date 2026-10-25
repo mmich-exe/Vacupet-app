@@ -43,7 +43,8 @@ import com.example.vacupet.viewmodel.AuthUiState
 fun LoginScreen(
     state: AuthUiState,
     onLogin: (email: String, password: String) -> Unit,
-    onIrARegistro: () -> Unit
+    onIrARegistro: () -> Unit,
+    onRecuperarPassword: (email: String) -> Unit
 ) {
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
@@ -105,6 +106,15 @@ fun LoginScreen(
                 )
             }
 
+            if (state.mensaje != null) {
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    text = state.mensaje,
+                    color = VerdeOscuro,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
             Spacer(Modifier.height(20.dp))
             Button(
                 onClick = { onLogin(email, password) },
@@ -119,6 +129,9 @@ fun LoginScreen(
                 } else {
                     Text("Iniciar sesión", fontWeight = FontWeight.Bold)
                 }
+            }
+            TextButton(onClick = { onRecuperarPassword(email) }, enabled = !state.cargando) {
+                Text("¿Olvidaste tu contraseña?", color = VerdeOscuro)
             }
             TextButton(onClick = onIrARegistro) {
                 Text("¿No tienes cuenta? Regístrate", color = VerdeOscuro)

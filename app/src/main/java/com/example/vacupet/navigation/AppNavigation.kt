@@ -20,6 +20,7 @@ import com.example.vacupet.screens.AgendaScreen
 import com.example.vacupet.screens.DetalleScreen
 import com.example.vacupet.screens.FormularioScreen
 import com.example.vacupet.screens.ListadoScreen
+import com.example.vacupet.screens.PerfilScreen
 import com.example.vacupet.screens.LoginScreen
 import com.example.vacupet.screens.RecordatoriosScreen
 import com.example.vacupet.screens.RegistroScreen
@@ -78,7 +79,8 @@ fun AppNavigation(
                 onIrARegistro = {
                     authViewModel.limpiarError()
                     navController.navigate(Rutas.REGISTRO)
-                }
+                },
+                onRecuperarPassword = authViewModel::recuperarPassword
             )
         }
         composable(Rutas.REGISTRO) {
@@ -104,7 +106,7 @@ fun AppNavigation(
                 onEditar = { id -> navController.navigate(Rutas.formulario(id)) },
                 onNueva = { navController.navigate(Rutas.formulario()) },
                 onAgenda = { navController.navigate(Rutas.AGENDA) },
-                onCerrarSesion = authViewModel::logout
+                onPerfil = { navController.navigate(Rutas.PERFIL) }
             )
         }
 
@@ -183,6 +185,22 @@ fun AppNavigation(
                 },
                 onEliminar = vm::eliminarRecordatorio,
                 onLimpiarErrores = vm::limpiarErroresRecordatorio,
+                onVolver = { navController.popBackStack() }
+            )
+        }
+
+        composable(Rutas.PERFIL) {
+            val vm = appViewModel ?: return@composable
+            val state by vm.uiState.collectAsStateWithLifecycle()
+            PerfilScreen(
+                email = auth.email.orEmpty(),
+                perfil = state.perfil,
+                totalMascotas = state.mascotas.size,
+                citasProximas = state.citasProximas.size,
+                errores = state.erroresPerfil,
+                onGuardar = vm::guardarPerfil,
+                onLimpiarErrores = vm::limpiarErroresPerfil,
+                onCerrarSesion = authViewModel::logout,
                 onVolver = { navController.popBackStack() }
             )
         }

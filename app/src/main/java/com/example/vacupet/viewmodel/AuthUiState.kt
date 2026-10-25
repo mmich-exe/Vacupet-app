@@ -5,5 +5,6 @@ data class AuthUiState(
     val uid: String? = null,
     val email: String? = null,
     val cargando: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val mensaje: String? = null
 )

@@ -49,3 +49,17 @@ data class Recordatorio(
     val motivo: String,
     val descripcion: String
 )
+
+/**
+ * Perfil del usuario (no de sus mascotas). La clave es el uid de Firebase,
+ * por lo que cada cuenta tiene como máximo un perfil.
+ */
+@Entity(tableName = "perfiles")
+data class Perfil(
+    @PrimaryKey val userId: String,
+    val nombre: String,
+    val telefono: String = "",
+    val cumpleanos: String = "",
+    val ciudad: String = "",
+    val fotoPath: String? = null
+)

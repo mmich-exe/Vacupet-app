@@ -1,6 +1,8 @@
 package com.example.vacupet.repository
 
 import com.example.vacupet.data.Mascota
+import com.example.vacupet.data.Perfil
+import com.example.vacupet.data.PerfilDao
 import com.example.vacupet.data.MascotaDao
 import com.example.vacupet.data.Recordatorio
 import com.example.vacupet.data.RecordatorioDao
@@ -12,7 +14,8 @@ import kotlinx.coroutines.flow.Flow
  */
 class AppRepository(
     private val mascotaDao: MascotaDao,
-    private val recordatorioDao: RecordatorioDao
+    private val recordatorioDao: RecordatorioDao,
+    private val perfilDao: PerfilDao
 ) {
     // ----- Mascotas (CRUD) -----
     fun observarMascotas(userId: String): Flow<List<Mascota>> = mascotaDao.observarTodas(userId)
@@ -29,6 +32,13 @@ class AppRepository(
 
     suspend fun eliminarMascota(mascota: Mascota) {
         mascotaDao.eliminar(mascota)
+    }
+
+    // ----- Perfil del usuario -----
+    fun observarPerfil(userId: String): Flow<Perfil?> = perfilDao.observar(userId)
+
+    suspend fun guardarPerfil(perfil: Perfil) {
+        perfilDao.guardar(perfil)
     }
 
     // ----- Recordatorios -----
