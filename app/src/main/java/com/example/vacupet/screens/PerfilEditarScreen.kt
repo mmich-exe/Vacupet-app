@@ -5,6 +5,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -43,6 +45,7 @@ import com.example.vacupet.components.formatearFecha
 import com.example.vacupet.components.mostrarSelectorFecha
 import com.example.vacupet.data.Perfil
 import com.example.vacupet.viewmodel.PerfilErrores
+import java.util.Calendar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -129,20 +132,34 @@ fun PerfilEditarScreen(
                     supportingText = { errores.telefono?.let { Text(it) } },
                     modifier = Modifier.fillMaxWidth()
                 )
-                OutlinedTextField(
-                    value = cumpleanos,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Fecha de nacimiento") },
-                    trailingIcon = {
-                        IconButton(onClick = {
-                            mostrarSelectorFecha(context) { cumpleanos = formatearFecha(it) }
-                        }) {
-                            Icon(Icons.Default.DateRange, contentDescription = "Elegir fecha")
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                )
+                val hace10AnosMilis = remember {
+                    Calendar.getInstance().apply { add(Calendar.YEAR, -10) }.timeInMillis
+                }
+                val abrirSelectorFecha = {
+                    mostrarSelectorFecha(context, maxFecha = hace10AnosMilis) { cumpleanos = formatearFecha(it) }
+                }
+
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    OutlinedTextField(
+                        value = cumpleanos,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Fecha de nacimiento *") },
+                        isError = errores.cumpleanos != null,
+                        supportingText = { errores.cumpleanos?.let { Text(it) } },
+                        trailingIcon = {
+                            IconButton(onClick = abrirSelectorFecha) {
+                                Icon(Icons.Default.DateRange, contentDescription = "Elegir fecha")
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .clickable(onClick = abrirSelectorFecha)
+                    )
+                }
                 OutlinedTextField(
                     value = ciudad,
                     onValueChange = { ciudad = it },

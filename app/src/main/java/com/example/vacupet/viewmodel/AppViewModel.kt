@@ -6,6 +6,9 @@ import com.example.vacupet.data.Mascota
 import com.example.vacupet.data.Perfil
 import com.example.vacupet.data.Recordatorio
 import com.example.vacupet.repository.AppRepository
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -76,7 +79,9 @@ class AppViewModel(
                 nombre.trim().length < 2 -> "Debe tener al menos 2 caracteres"
                 else -> null
             },
-            especie = if (especie.isBlank()) "Selecciona una especie" else null
+            especie = if (especie.isBlank()) "Selecciona una especie" else null,
+            cumpleanos = if (cumpleanos.isNotBlank() && !esFechaPasadaOHoy(cumpleanos))
+                "El cumpleaños no puede ser una fecha futura" else null
         )
         if (errores.hayErrores) {
             local.update { it.copy(erroresMascota = errores) }
@@ -145,7 +150,12 @@ class AppViewModel(
                 else -> null
             },
             telefono = if (telefono.isNotBlank() && digitos.length !in 8..15)
-                "Ingresa un teléfono válido (8 a 15 dígitos)" else null
+                "Ingresa un teléfono válido (8 a 15 dígitos)" else null,
+            cumpleanos = when {
+                cumpleanos.isBlank() -> "La fecha de nacimiento es obligatoria"
+                !esAlMenos10AnosAtras(cumpleanos) -> "Debe ser al menos 10 años antes de la fecha actual"
+                else -> null
+            }
         )
         if (errores.hayErrores) {
             local.update { it.copy(erroresPerfil = errores) }
@@ -167,6 +177,59 @@ class AppViewModel(
         }
     }
 
+    private fun esAlMenos10AnosAtras(fechaStr: String): Boolean {
+        if (fechaStr.isBlank()) return false
+        return try {
+            val sdf = SimpleDateFormat("dd/MM/yyyy", Locale("es", "CL")).apply {
+                isLenient = false
+            }
+            val date = sdf.parse(fechaStr) ?: return false
+            val calNacimiento = Calendar.getInstance().apply {
+                time = date
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+            val hace10Anos = Calendar.getInstance().apply {
+                add(Calendar.YEAR, -10)
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+            !calNacimiento.after(hace10Anos)
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    private fun esFechaPasadaOHoy(fechaStr: String): Boolean {
+        if (fechaStr.isBlank()) return true
+        return try {
+            val sdf = SimpleDateFormat("dd/MM/yyyy", Locale("es", "CL")).apply {
+                isLenient = false
+            }
+            val date = sdf.parse(fechaStr) ?: return false
+            val calCumple = Calendar.getInstance().apply {
+                time = date
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+            val hoy = Calendar.getInstance().apply {
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+            !calCumple.after(hoy)
+        } catch (_: Exception) {
+            false
+        }
+    }
+
     // ---------- Recordatorios ----------
 
     fun limpiarErroresRecordatorio() = local.update { it.copy(erroresRecordatorio = RecordatorioErrores()) }
@@ -178,8 +241,20 @@ class AppViewModel(
         descripcion: String,
         onGuardado: () -> Unit
     ) {
+        val inicioDeManana = Calendar.getInstance().apply {
+            add(Calendar.DAY_OF_MONTH, 1)
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }.timeInMillis
+
         val errores = RecordatorioErrores(
-            fecha = if (fecha == null) "Selecciona la fecha de la cita" else null,
+            fecha = when {
+                fecha == null -> "Selecciona la fecha de la cita"
+                fecha < inicioDeManana -> "La fecha de la cita debe ser posterior al día actual"
+                else -> null
+            },
             motivo = if (motivo.isBlank()) "El motivo es obligatorio" else null,
             descripcion = if (descripcion.isBlank()) "La descripción es obligatoria" else null
         )

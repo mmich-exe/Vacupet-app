@@ -52,9 +52,20 @@ fun formatearFecha(milisegundos: Long): String =
     SimpleDateFormat("dd/MM/yyyy", Locale("es", "CL")).format(Date(milisegundos))
 
 /** Abre el selector de fecha de Android y devuelve la fecha elegida en milisegundos. */
-fun mostrarSelectorFecha(context: Context, onFechaElegida: (Long) -> Unit) {
-    val hoy = Calendar.getInstance()
-    DatePickerDialog(
+fun mostrarSelectorFecha(
+    context: Context,
+    minFecha: Long? = null,
+    maxFecha: Long? = null,
+    onFechaElegida: (Long) -> Unit
+) {
+    val calInicial = Calendar.getInstance()
+    if (minFecha != null && calInicial.timeInMillis < minFecha) {
+        calInicial.timeInMillis = minFecha
+    }
+    if (maxFecha != null && calInicial.timeInMillis > maxFecha) {
+        calInicial.timeInMillis = maxFecha
+    }
+    val dialog = DatePickerDialog(
         context,
         { _, anio, mes, dia ->
             val elegida = Calendar.getInstance().apply {
@@ -63,10 +74,17 @@ fun mostrarSelectorFecha(context: Context, onFechaElegida: (Long) -> Unit) {
             }
             onFechaElegida(elegida.timeInMillis)
         },
-        hoy.get(Calendar.YEAR),
-        hoy.get(Calendar.MONTH),
-        hoy.get(Calendar.DAY_OF_MONTH)
-    ).show()
+        calInicial.get(Calendar.YEAR),
+        calInicial.get(Calendar.MONTH),
+        calInicial.get(Calendar.DAY_OF_MONTH)
+    )
+    if (minFecha != null) {
+        dialog.datePicker.minDate = minFecha
+    }
+    if (maxFecha != null) {
+        dialog.datePicker.maxDate = maxFecha
+    }
+    dialog.show()
 }
 
 // ---------------------------------------------------------------- fotos

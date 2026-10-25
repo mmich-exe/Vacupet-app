@@ -8,9 +8,10 @@ import java.util.Calendar
 /** Errores de validación del formulario de mascota (null = campo válido). */
 data class MascotaErrores(
     val nombre: String? = null,
-    val especie: String? = null
+    val especie: String? = null,
+    val cumpleanos: String? = null
 ) {
-    val hayErrores: Boolean get() = nombre != null || especie != null
+    val hayErrores: Boolean get() = nombre != null || especie != null || cumpleanos != null
 }
 
 /** Errores de validación del formulario de recordatorio. */
@@ -25,9 +26,10 @@ data class RecordatorioErrores(
 /** Errores de validación del perfil. */
 data class PerfilErrores(
     val nombre: String? = null,
-    val telefono: String? = null
+    val telefono: String? = null,
+    val cumpleanos: String? = null
 ) {
-    val hayErrores: Boolean get() = nombre != null || telefono != null
+    val hayErrores: Boolean get() = nombre != null || telefono != null || cumpleanos != null
 }
 
 /** Estado completo que la UI observa. */

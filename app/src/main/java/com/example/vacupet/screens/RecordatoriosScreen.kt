@@ -1,6 +1,8 @@
 package com.example.vacupet.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -43,6 +46,7 @@ import com.example.vacupet.components.mostrarSelectorFecha
 import com.example.vacupet.data.Mascota
 import com.example.vacupet.data.Recordatorio
 import com.example.vacupet.viewmodel.RecordatorioErrores
+import java.util.Calendar
 
 /** Agregar y eliminar recordatorios (citas, vacunas, controles) de una mascota. */
 @Composable
@@ -86,22 +90,41 @@ fun RecordatoriosScreen(
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Text("Nueva cita", fontWeight = FontWeight.Bold, color = NaranjaCita)
-                            OutlinedTextField(
-                                value = fecha?.let { formatearFecha(it) } ?: "",
-                                onValueChange = {},
-                                readOnly = true,
-                                label = { Text("Fecha de la cita *") },
-                                isError = errores.fecha != null,
-                                supportingText = { errores.fecha?.let { Text(it) } },
-                                trailingIcon = {
-                                    IconButton(onClick = {
-                                        mostrarSelectorFecha(context) { fecha = it }
-                                    }) {
-                                        Icon(Icons.Default.DateRange, contentDescription = "Elegir fecha")
-                                    }
-                                },
-                                modifier = Modifier.fillMaxWidth()
-                            )
+
+                            val inicioDeManana = remember {
+                                Calendar.getInstance().apply {
+                                    add(Calendar.DAY_OF_MONTH, 1)
+                                    set(Calendar.HOUR_OF_DAY, 0)
+                                    set(Calendar.MINUTE, 0)
+                                    set(Calendar.SECOND, 0)
+                                    set(Calendar.MILLISECOND, 0)
+                                }.timeInMillis
+                            }
+                            val abrirSelectorFecha = {
+                                mostrarSelectorFecha(context, minFecha = inicioDeManana) { fecha = it }
+                            }
+
+                            Box(modifier = Modifier.fillMaxWidth()) {
+                                OutlinedTextField(
+                                    value = fecha?.let { formatearFecha(it) } ?: "",
+                                    onValueChange = {},
+                                    readOnly = true,
+                                    label = { Text("Fecha de la cita *") },
+                                    isError = errores.fecha != null,
+                                    supportingText = { errores.fecha?.let { Text(it) } },
+                                    trailingIcon = {
+                                        IconButton(onClick = abrirSelectorFecha) {
+                                            Icon(Icons.Default.DateRange, contentDescription = "Elegir fecha")
+                                        }
+                                    },
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                                Box(
+                                    modifier = Modifier
+                                        .matchParentSize()
+                                        .clickable(onClick = abrirSelectorFecha)
+                                )
+                            }
                             OutlinedTextField(
                                 value = motivo,
                                 onValueChange = { motivo = it },
