@@ -17,7 +17,13 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.vacupet.repository.AppRepository
 import com.example.vacupet.screens.AgendaScreen
+import com.example.vacupet.screens.DetalleRazaGatoScreen
+import com.example.vacupet.screens.DetalleRazaScreen
 import com.example.vacupet.screens.DetalleScreen
+import com.example.vacupet.screens.RazasGatosScreen
+import com.example.vacupet.screens.RazasScreen
+import com.example.vacupet.viewmodel.CatViewModel
+import com.example.vacupet.viewmodel.DogViewModel
 import com.example.vacupet.screens.FavoritosScreen
 import com.example.vacupet.screens.FormularioScreen
 import com.example.vacupet.screens.InicioScreen
@@ -45,6 +51,9 @@ fun AppNavigation(
     val appViewModel: AppViewModel? = auth.uid?.let { uid ->
         viewModel<AppViewModel>(key = uid, factory = AppViewModelFactory(repository, uid))
     }
+
+    val dogViewModel: DogViewModel = viewModel()
+    val catViewModel: CatViewModel = viewModel()
 
     // Reacciona a cambios de sesión: login -> Menú principal, logout -> Login.
     LaunchedEffect(auth.uid) {
@@ -109,7 +118,9 @@ fun AppNavigation(
                 onMascotas = { navController.navigate(Rutas.LISTADO) },
                 onRecordatorios = { navController.navigate(Rutas.AGENDA) },
                 onFavoritos = { navController.navigate(Rutas.FAVORITOS) },
-                onPerfil = { navController.navigate(Rutas.PERFIL) }
+                onPerfil = { navController.navigate(Rutas.PERFIL) },
+                onRazas = { navController.navigate(Rutas.RAZAS) },
+                onRazasGatos = { navController.navigate(Rutas.RAZAS_GATOS) }
             )
         }
 
@@ -263,6 +274,56 @@ fun AppNavigation(
                     )
                 },
                 onLimpiarErrores = vm::limpiarErroresPerfil,
+                onVolver = { navController.popBackStack() }
+            )
+        }
+
+        composable(Rutas.RAZAS) {
+            val state by dogViewModel.uiState.collectAsStateWithLifecycle()
+            RazasScreen(
+                state = state,
+                onBusquedaChange = dogViewModel::cambiarBusqueda,
+                onApiKeyChange = dogViewModel::cambiarApiKey,
+                onAbrirDetalle = { id -> navController.navigate(Rutas.detalleRaza(id)) },
+                onReintentar = dogViewModel::cargarRazas,
+                onVolver = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = Rutas.DETALLE_RAZA,
+            arguments = listOf(navArgument(Rutas.ARG_ID) { type = NavType.IntType })
+        ) { entry ->
+            val id = entry.arguments?.getInt(Rutas.ARG_ID) ?: -1
+            val state by dogViewModel.uiState.collectAsStateWithLifecycle()
+            val breed = state.breedPorId(id)
+            DetalleRazaScreen(
+                breed = breed,
+                onVolver = { navController.popBackStack() }
+            )
+        }
+
+        composable(Rutas.RAZAS_GATOS) {
+            val state by catViewModel.uiState.collectAsStateWithLifecycle()
+            RazasGatosScreen(
+                state = state,
+                onBusquedaChange = catViewModel::cambiarBusqueda,
+                onApiKeyChange = catViewModel::cambiarApiKey,
+                onAbrirDetalle = { id -> navController.navigate(Rutas.detalleRazaGato(id)) },
+                onReintentar = catViewModel::cargarRazas,
+                onVolver = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = Rutas.DETALLE_RAZA_GATO,
+            arguments = listOf(navArgument(Rutas.ARG_ID) { type = NavType.StringType })
+        ) { entry ->
+            val id = entry.arguments?.getString(Rutas.ARG_ID) ?: ""
+            val state by catViewModel.uiState.collectAsStateWithLifecycle()
+            val breed = state.breedPorId(id)
+            DetalleRazaGatoScreen(
+                breed = breed,
                 onVolver = { navController.popBackStack() }
             )
         }

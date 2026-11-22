@@ -15,6 +15,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.background
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -48,7 +50,9 @@ fun InicioScreen(
     onMascotas: () -> Unit,
     onRecordatorios: () -> Unit,
     onFavoritos: () -> Unit,
-    onPerfil: () -> Unit
+    onPerfil: () -> Unit,
+    onRazas: () -> Unit,
+    onRazasGatos: () -> Unit
 ) {
     Scaffold(topBar = { VacuTopBar(titulo = "VacuPet") }) { padding ->
         FondoDegradado(Modifier.padding(padding)) {
@@ -107,7 +111,7 @@ fun InicioScreen(
                     onClick = onMascotas
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_pet),
+                        imageVector = Icons.Default.Face,
                         contentDescription = null,
                         tint = VerdeVacu,
                         modifier = Modifier.size(30.dp)
@@ -134,6 +138,30 @@ fun InicioScreen(
                         imageVector = Icons.Default.Star,
                         contentDescription = null,
                         tint = DoradoFavorito,
+                        modifier = Modifier.size(30.dp)
+                    )
+                }
+                MenuCard(
+                    titulo = "Busca razas de perros",
+                    subtitulo = "Conoce temperamentos, cuidados y más",
+                    onClick = onRazas
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_paw),
+                        contentDescription = null,
+                        tint = VerdeVacu,
+                        modifier = Modifier.size(30.dp)
+                    )
+                }
+                MenuCard(
+                    titulo = "Busca razas de gatos",
+                    subtitulo = "Conoce temperamentos, cuidados y más",
+                    onClick = onRazasGatos
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Favorite,
+                        contentDescription = null,
+                        tint = VerdeVacu,
                         modifier = Modifier.size(30.dp)
                     )
                 }
