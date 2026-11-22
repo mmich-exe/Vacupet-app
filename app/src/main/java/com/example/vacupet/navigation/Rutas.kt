@@ -12,6 +12,8 @@ object Rutas {
     const val PERFIL_EDITAR = "perfil_editar"
     const val RAZAS = "razas"
     const val RAZAS_GATOS = "razas_gatos"
+    const val COMUNIDAD = "comunidad"
+    const val CREAR_AVISO = "crear_aviso"
 
     const val ARG_ID = "id"
 

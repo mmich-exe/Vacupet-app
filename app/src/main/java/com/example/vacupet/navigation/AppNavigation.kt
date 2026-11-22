@@ -17,12 +17,15 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.vacupet.repository.AppRepository
 import com.example.vacupet.screens.AgendaScreen
+import com.example.vacupet.screens.ComunidadScreen
+import com.example.vacupet.screens.CrearAvisoPerdidoScreen
 import com.example.vacupet.screens.DetalleRazaGatoScreen
 import com.example.vacupet.screens.DetalleRazaScreen
 import com.example.vacupet.screens.DetalleScreen
 import com.example.vacupet.screens.RazasGatosScreen
 import com.example.vacupet.screens.RazasScreen
 import com.example.vacupet.viewmodel.CatViewModel
+import com.example.vacupet.viewmodel.CommunityViewModel
 import com.example.vacupet.viewmodel.DogViewModel
 import com.example.vacupet.screens.FavoritosScreen
 import com.example.vacupet.screens.FormularioScreen
@@ -54,6 +57,7 @@ fun AppNavigation(
 
     val dogViewModel: DogViewModel = viewModel()
     val catViewModel: CatViewModel = viewModel()
+    val communityViewModel: CommunityViewModel = viewModel()
 
     // Reacciona a cambios de sesión: login -> Menú principal, logout -> Login.
     LaunchedEffect(auth.uid) {
@@ -120,7 +124,8 @@ fun AppNavigation(
                 onFavoritos = { navController.navigate(Rutas.FAVORITOS) },
                 onPerfil = { navController.navigate(Rutas.PERFIL) },
                 onRazas = { navController.navigate(Rutas.RAZAS) },
-                onRazasGatos = { navController.navigate(Rutas.RAZAS_GATOS) }
+                onRazasGatos = { navController.navigate(Rutas.RAZAS_GATOS) },
+                onComunidad = { navController.navigate(Rutas.COMUNIDAD) }
             )
         }
 
@@ -325,6 +330,21 @@ fun AppNavigation(
             DetalleRazaGatoScreen(
                 breed = breed,
                 onVolver = { navController.popBackStack() }
+            )
+        }
+
+        composable(Rutas.COMUNIDAD) {
+            ComunidadScreen(
+                viewModel = communityViewModel,
+                onNavigateToCreate = { navController.navigate(Rutas.CREAR_AVISO) },
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Rutas.CREAR_AVISO) {
+            CrearAvisoPerdidoScreen(
+                viewModel = communityViewModel,
+                onBack = { navController.popBackStack() }
             )
         }
     }

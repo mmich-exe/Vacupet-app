@@ -17,6 +17,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -52,7 +53,8 @@ fun InicioScreen(
     onFavoritos: () -> Unit,
     onPerfil: () -> Unit,
     onRazas: () -> Unit,
-    onRazasGatos: () -> Unit
+    onRazasGatos: () -> Unit,
+    onComunidad: () -> Unit
 ) {
     Scaffold(topBar = { VacuTopBar(titulo = "VacuPet") }) { padding ->
         FondoDegradado(Modifier.padding(padding)) {
@@ -104,6 +106,19 @@ fun InicioScreen(
                     fontWeight = FontWeight.Bold,
                     color = VerdeOscuro
                 )
+
+                MenuCard(
+                    titulo = "Comunidad Vacupet",
+                    subtitulo = "Mascotas perdidas (Cámara y GPS)",
+                    onClick = onComunidad
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.LocationOn,
+                        contentDescription = null,
+                        tint = VerdeVacu,
+                        modifier = Modifier.size(30.dp)
+                    )
+                }
 
                 MenuCard(
                     titulo = "Mis hijos animales",
