@@ -2,6 +2,7 @@ package com.example.vacupet.screens
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -11,6 +12,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,6 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
+import com.example.vacupet.components.copiarFotoAInterno
 import com.example.vacupet.viewmodel.CommunityViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -61,6 +64,18 @@ fun CrearAvisoPerdidoScreen(
     ) { success ->
         if (success && tempImageUri != null) {
             photoUriString = tempImageUri.toString()
+        }
+    }
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            val internalPath = copiarFotoAInterno(context, uri)
+            if (internalPath != null) {
+                photoUriString = internalPath
+                Toast.makeText(context, "Foto cargada desde la galería", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -188,7 +203,7 @@ fun CrearAvisoPerdidoScreen(
                 minLines = 3
             )
 
-            // Camera Section
+            // Camera & Gallery Section
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -207,25 +222,43 @@ fun CrearAvisoPerdidoScreen(
                                 .clip(MaterialTheme.shapes.medium),
                             contentScale = ContentScale.Crop
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
                     }
-                    Button(
-                        onClick = {
-                            val permissionCheck = ContextCompat.checkSelfPermission(
-                                context,
-                                Manifest.permission.CAMERA
-                            )
-                            if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
-                                val uri = viewModel.createTempImageUri(context)
-                                cameraLauncher.launch(uri)
-                            } else {
-                                cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-                            }
-                        }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Icon(Icons.Default.CameraAlt, contentDescription = "Tomar foto")
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(if (photoUriString.isBlank()) "Tomar Foto con Cámara" else "Cambiar Foto")
+                        Button(
+                            onClick = {
+                                val permissionCheck = ContextCompat.checkSelfPermission(
+                                    context,
+                                    Manifest.permission.CAMERA
+                                )
+                                if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
+                                    val uri = viewModel.createTempImageUri(context)
+                                    cameraLauncher.launch(uri)
+                                } else {
+                                    cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                                }
+                            },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Icon(Icons.Default.CameraAlt, contentDescription = "Tomar foto")
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Cámara")
+                        }
+
+                        Button(
+                            onClick = {
+                                galleryLauncher.launch("image/*")
+                            },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Icon(Icons.Default.PhotoLibrary, contentDescription = "Galería")
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Galería")
+                        }
                     }
                 }
             }
