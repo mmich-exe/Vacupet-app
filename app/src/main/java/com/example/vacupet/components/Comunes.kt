@@ -131,7 +131,9 @@ fun FotoMascota(ruta: String?, tamano: Dp, modifier: Modifier = Modifier) {
             Image(
                 bitmap = imagen.asImageBitmap(),
                 contentDescription = "Foto de la mascota",
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(CircleShape),
                 contentScale = ContentScale.Crop
             )
         } else {

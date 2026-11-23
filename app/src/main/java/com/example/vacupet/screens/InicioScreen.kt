@@ -101,6 +101,13 @@ fun InicioScreen(
                 }
 
                 Text(
+                    text = "By mmich-exe & multi-fruit",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = Color.Gray,
+                    modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
+                )
+
+                Text(
                     text = "¿Qué quieres hacer?",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,

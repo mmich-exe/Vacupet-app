@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -43,10 +44,15 @@ fun ComunidadScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Comunidad Vacupet (Mascotas Perdidas)") },
+                title = { Text("Comunidad Vacupet") },
                 navigationIcon = {
                     TextButton(onClick = onBack) {
                         Text("Volver")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { viewModel.loadPosts() }) {
+                        Icon(Icons.Default.Refresh, contentDescription = "Actualizar publicaciones")
                     }
                 }
             )
